@@ -1,0 +1,4 @@
+[submodule "sena-rs"]
+	path = sena-rs
+	url = https://github.com/OpenEroge/sena-rs.git
+	branch = iroha

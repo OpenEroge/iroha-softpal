@@ -1,0 +1,15 @@
+# Private game content: NEVER commit
+/iroha_game/
+# Local working area (unpacked assets, diagnostics, isolated game root)
+/work/
+
+target/
+.DS_Store
+*.pac
+*.exe
+*.dll
+*.mai
+*.rar
+*.dat
+*.PGD
+*.pgd
