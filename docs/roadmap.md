@@ -23,7 +23,7 @@
 - [x] headless 能经过 logo/注意事项画面，到达标题界面并截图。→ [ADR-0002](adr/0002-native-interface-and-extcalls.md)
 
 ## M3 主线 ADV
-- [x] 开始游戏 → 第一句台词；文本（`DEFAULT_FONT.DAT`/字体）、立绘、背景、表情（face）、BGM/SE/语音。→ [ADR-0003](adr/0003-m3-game-start-and-av.md)（音频已有播放日志，还需开窗口人耳确认）
+- [x] 开始游戏 → 第一句台词；文本（`DEFAULT_FONT.DAT`/字体）、立绘、背景、表情（face）、BGM/SE/语音。→ [ADR-0003](adr/0003-m3-game-start-and-av.md)（音频已于 2026-11-10 由用户开窗口人耳确认）
 - [x] 选项、存读档（`save/`）、系统菜单、backlog、TIPS（`tips.pac`）、SD 演出（`sd.pac`）、`.ANI` 镜头动画。→ [ADR-0004](adr/0004-m3-native-subsystems.md)
   - 选项：本作脚本没有原生选项块（没有 6:1/6:2/6:3）；1,000,000 帧共通线自动推进也没有遇到任何选项。
   - SD 演出：第 632000 帧前后出现 SD001A，之后还有 SD002A–D、SD003A，画面正常（`work/diag/m3/sd/png/sheet.png`）。
