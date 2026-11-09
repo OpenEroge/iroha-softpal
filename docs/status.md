@@ -33,6 +33,8 @@ sena-rs `iroha` 分支 `849c2fd`..`073f950`，详见 [ADR-0004](adr/0004-m3-nati
   - 存档“データ移動”（`mv2/mv3`）
   - SAVE/SYSTEM 回归（`r_save`、`r_system`、`r2_pair`）
 - 600000 帧自动推进：剧情持续推进，没有 unimplemented，没有出现任何选项（`long2/sheet.png`）。
+- 1,000,000 帧自动推进：没有 unimplemented，没有 panic。SD 演出 SD001A 出现在第 632000 帧前后，之后还有 SD002A–D、SD003A，截图检查过（`sd/png/sheet.png`）。
+- 音频资源：BGM.CSV 59 行的循环点全部为 0，OGG 也没有 loop 标签，所以 BGM 都是整首循环。`.MIX` 用 sena 的解码路径可以合成为混音（临时探针，没有提交）。
 - 栈深度：30000 帧里，每次 `text` 调用时的栈深度一直稳定，不再增长。
 
 ### 结论 / 未完成

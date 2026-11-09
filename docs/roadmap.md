@@ -11,7 +11,10 @@
 - [x] 所有 `.pac` 都能列出和解包，不报错（`scripts/unpack.sh <name> --list-only`）。
 - [x] PGD 变体全部能解码（用 `dump-pgd-info` 批量扫描 st/ev/bk/system/battle），整理出不支持的格式清单。
 - [x] 弄清 ARCHIVE.DAT 三行的含义，以及引擎选用哪一行；找到 SYSTEM.INI 的真实来源和关键键值（逻辑分辨率、字体）。
-- [x] 音频：OGG/WAV/`.MIX`/BGM.CSV 循环点；视频：`movie.pac` 的容器与编码（MPG/WMV？）。（全部 OGG + MPEG-1 PS；LOGO/OPENING 能播放，OP 画面与 ffmpeg 对照一致；BGM/SE/语音在实时 headless 中有 play 日志，见 ADR-0003。BGM 循环点和 `.MIX` 还没有专门测）
+- [x] 音频：OGG/WAV/`.MIX`/BGM.CSV 循环点；视频：`movie.pac` 的容器与编码（MPG/WMV？）。全部是 OGG + MPEG-1 PS：
+  - LOGO/OPENING 能播放，OP 画面与 ffmpeg 对照一致；BGM/SE/语音在实时 headless 中有 play 日志，见 ADR-0003。
+  - BGM.CSV 共 59 行，循环点全部为 0，OGG 里也没有 loop 标签，所以 BGM 都是整首循环。
+  - 6 个 `.MIX` 是 32 字节一条的语音名列表，用 sena 的解码路径可以合成为混音（实测 VO98_MIX_00A 约 1.0 秒、57A 约 2.0 秒）。
 - 产出：一份 ADR，记录与 Koikake 的资源差异。→ [ADR-0001](adr/0001-resource-layer.md)
 
 ## M2 VM 启动到标题
@@ -21,7 +24,9 @@
 
 ## M3 主线 ADV
 - [x] 开始游戏 → 第一句台词；文本（`DEFAULT_FONT.DAT`/字体）、立绘、背景、表情（face）、BGM/SE/语音。→ [ADR-0003](adr/0003-m3-game-start-and-av.md)（音频已有播放日志，还需开窗口人耳确认）
-- [ ] 选项、存读档（`save/`）、系统菜单、backlog、TIPS（`tips.pac`）、SD 演出（`sd.pac`）、`.ANI` 镜头动画。
+- [x] 选项、存读档（`save/`）、系统菜单、backlog、TIPS（`tips.pac`）、SD 演出（`sd.pac`）、`.ANI` 镜头动画。→ [ADR-0004](adr/0004-m3-native-subsystems.md)
+  - 选项：本作脚本没有原生选项块（没有 6:1/6:2/6:3）；1,000,000 帧共通线自动推进也没有遇到任何选项。
+  - SD 演出：第 632000 帧前后出现 SD001A，之后还有 SD002A–D、SD003A，画面正常（`work/diag/m3/sd/png/sheet.png`）。
 - [ ] 能用窗口模式完整玩通一条线（人工验收）。
 
 ## M4 战斗 / 特殊系统
