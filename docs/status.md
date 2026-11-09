@@ -4,7 +4,7 @@
 
 ## 2026-11-09 — M3 第三轮：收藏语音、游戏内 TIPS、extcall 参数审计
 
-sena-rs `iroha` 分支 `849c2fd`..`3b5dd04`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md) 第 6–9 节。
+sena-rs `iroha` 分支 `849c2fd`..`5c16593`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md) 第 6–9 节。
 
 ### 做了什么
 - **收藏语音**：18:60–68，`save/favoice.dat`，格式与原生相同。用到的辅助扩展有 18:57 `strcut`、18:106、18:107。
@@ -36,6 +36,9 @@ sena-rs `iroha` 分支 `849c2fd`..`3b5dd04`，详见 [ADR-0004](adr/0004-m3-nati
 - 1,000,000 帧自动推进：没有 unimplemented，没有 panic。SD 演出 SD001A 出现在第 632000 帧前后，之后还有 SD002A–D、SD003A，截图检查过（`sd/png/sheet.png`）。
 - 音频资源：BGM.CSV 59 行的循环点全部为 0，OGG 也没有 loop 标签，所以 BGM 都是整首循环。`.MIX` 用 sena 的解码路径可以合成为混音（临时探针，没有提交）。
 - 栈深度：30000 帧里，每次 `text` 调用时的栈深度一直稳定，不再增长。
+
+- **整线通关（自动）**：auto-advance 在约第 2,250,000 帧通关，回到通关后的标题画面。途中只有 18:92 未实现，它是 `AdvDebugOutputCore` 的包装，弹 8 个值，`5c16593` 已补上（18:90 同理）。修复后重跑到第 2,300,000 帧，没有 unimplemented，没有 panic（`route/sheet.png`、`route/confirm.png`）。
+- **音频实测**：用 sena 的解码路径解码 BGM08（466.56 秒）、BGM01、SE01_A000A、VO01_00001，时长与 ffprobe 一致，RMS 和峰值都正常。窗口模式启动 20 秒没有崩溃。
 
 ### 结论 / 未完成
 - **选项**：本作没有原生的选项块（脚本里没有 6:1/6:2/6:3），600000 帧里也没有遇到。
