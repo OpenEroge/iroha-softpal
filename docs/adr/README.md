@@ -9,4 +9,5 @@
 
 | # | 标题 | 状态 |
 |---|---|---|
-| — | （暂无） | — |
+| 0001 | [资源层与 Koikake 的差异](0001-resource-layer.md) | Accepted |
+| 0002 | [trenka/Pal.dll 原生接口、extcall 覆盖与 gosub 操作数](0002-native-interface-and-extcalls.md) | Accepted / Proposed（未实现的 extcall） |

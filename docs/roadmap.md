@@ -8,16 +8,16 @@
 - git 仓库、`sena-rs` submodule（`iroha` 分支）、脚本、hook、文档、CLAUDE.md。
 
 ## M1 资源层
-- [ ] 所有 `.pac` 都能列出和解包，不报错（`scripts/unpack.sh <name> --list-only`）。
-- [ ] PGD 变体全部能解码（用 `dump-pgd-info` 批量扫描 st/ev/bk/system/battle），整理出不支持的格式清单。
-- [ ] 弄清 ARCHIVE.DAT 三行的含义，以及引擎选用哪一行；找到 SYSTEM.INI 的真实来源和关键键值（逻辑分辨率、字体）。
-- [ ] 音频：OGG/WAV/`.MIX`/BGM.CSV 循环点；视频：`movie.pac` 的容器与编码（MPG/WMV？）。
-- 产出：一份 ADR，记录与 Koikake 的资源差异。
+- [x] 所有 `.pac` 都能列出和解包，不报错（`scripts/unpack.sh <name> --list-only`）。
+- [x] PGD 变体全部能解码（用 `dump-pgd-info` 批量扫描 st/ev/bk/system/battle），整理出不支持的格式清单。
+- [x] 弄清 ARCHIVE.DAT 三行的含义，以及引擎选用哪一行；找到 SYSTEM.INI 的真实来源和关键键值（逻辑分辨率、字体）。
+- [ ] 音频：OGG/WAV/`.MIX`/BGM.CSV 循环点；视频：`movie.pac` 的容器与编码（MPG/WMV？）。（格式已查明：全部 OGG + MPEG-1 PS，logo 视频能播放；音频播放尚未做运行时验证，放到 M3）
+- 产出：一份 ADR，记录与 Koikake 的资源差异。→ [ADR-0001](adr/0001-resource-layer.md)
 
 ## M2 VM 启动到标题
-- [ ] 统计 `SCRIPT.SRC`（Sv20，7085 points）的 extcall，和 sena-rs 的 extsig 表做差，列出未知或被跳过的 extcall。
-- [ ] 逆向 `trenka.exe` 的 extcall slot 表和 `dll/Pal.dll` 的导出表，与 Koikake 的版本对比，按 sena-rs 的 ABI 规则登记。
-- [ ] headless 能经过 logo/注意事项画面，到达标题界面并截图。
+- [x] 统计 `SCRIPT.SRC`（Sv20，7085 points）的 extcall，和 sena-rs 的 extsig 表做差，列出未知或被跳过的 extcall。
+- [x] 逆向 `trenka.exe` 的 extcall slot 表和 `dll/Pal.dll` 的导出表，与 Koikake 的版本对比，按 sena-rs 的 ABI 规则登记。
+- [x] headless 能经过 logo/注意事项画面，到达标题界面并截图。→ [ADR-0002](adr/0002-native-interface-and-extcalls.md)
 
 ## M3 主线 ADV
 - [ ] 开始游戏 → 第一句台词；文本（`DEFAULT_FONT.DAT`/字体）、立绘、背景、表情（face）、BGM/SE/语音。

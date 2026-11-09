@@ -17,7 +17,7 @@
 
 ## 资源层（sena-rs 现状，2026-11-09 测得）
 
-- `ARCHIVE.DAT` 在 `data.pac` 里，共三行（含义未确认，推测分别对应正式版/体验版等配置）：
+- `ARCHIVE.DAT` 在 `data.pac` 里，内容是**逗号分隔的 3 个 profile**（每段末尾带 CRLF）。脚本只在 `mem_system[52]!=0` 时调用 `set_system_path`，默认用 profile 0（ADR-0001）：
   - `csv|tips|bgv|movie|bgm|mask|em|evx|ev|sd|etc|bk|se|system|face|voice|st|battle|tsubaki|test`
   - `...|battle|tsubaki|trial`
   - `...|battle|tsubaki|test`
@@ -25,7 +25,14 @@
 - Koikake 没有、本作独有的 pac：`battle.pac`（战斗 UI 的 PGD/OGG）、`csv.pac`、`tips.pac`、`evx.pac`、`sd.pac`。
 - `pal-assets <root> paths` / `list-pacs` 能正常解析，`battle.pac` 可以列出文件。
 - 脚本：`SCRIPT.SRC` 版本 `Sv20`，entry `0x31C`，points 7085（Koikake 是 entry `0x1F8`、4096 points）。`GRAPHIC.DAT` 有 52 条。
-- `data.pac` 里有 368 个文件：大量 `.ANI` 镜头动画、`.MIX` 语音混音列表，以及 `FILE/GRAPHIC/MEM/POINT/TEXT.DAT`、`SCRIPT.SRC`。`SYSTEM.INI` 不在 `data.pac` 里（引擎日志显示它是从 PAL 归档中读到的，具体在哪个 pac 待确认）。
+- `data.pac` 里有 368 个文件：大量 `.ANI` 镜头动画、`.MIX` 语音混音列表，以及 `FILE/GRAPHIC/MEM/POINT/TEXT.DAT`、`SCRIPT.SRC`。`SYSTEM.INI` 在 **`csv.pac`** 里（Shift-JIS，逻辑分辨率 `DEF_CG_WIDTH/HEIGHT`=1280×720，`DEF_FONT_TYPE=4`）。
+
+## 资源与原生接口概要（2026-11-09，ADR-0001/0002）
+
+- 37,480 个 pac 条目全部能解包；26,627 个 PGD（GE method 2/3 + PGD3 差分图）全部能解码。视频都是 MPEG-1 PS（LOGO/OPENING 1280×720@60，OPENING 带 MP2 音轨；em 是 240×152@48）；音频全部是 OGG。
+- `trenka.exe` 通过 **delay-load** 导入 PAL.dll 的 213 个函数；Pal.dll 有 285 个导出，最接近 sena 审计过的 Reference 版本（只多 1 个、少 6 个多语言导出），没有 registered profile 的标志导出。
+- 主 opcode 表 `0x64C890`（265 项），extcall category 表 `0x626098`；alias 区域和 Reference 不同（详见 `sena-rs/reverse/evidence/iroha-trenka-interface-inventory.json`）。
+- SCRIPT.SRC：419 种不同的 extcall，41,713 处调用，全部有原生 handler；sena 中有 86 种会被跳过（Skip）。
 
 ## 汉化覆盖层（M5 才处理）
 
@@ -33,7 +40,7 @@
 - `mai/img/*.PGD.mai`：660 个 PGD 替换图，另有 1 个 `TIPSS1056PGD.mai`（文件名少了点号）。
 - `mai/chg/`：`LOGO.mpg.mai`、`OPENING.mpg.mai`、`TIPS.CSV.mai`。
 - `mai/word.mai`（64KB），用途未知（字体映射或码表？）。
-- `mai.dll` 负责在运行时 hook 文件读取；`trenka_cn.exe` 和 `trenka.exe` 大小相同（2776576），可能只改了导入表或字符集。
+- `mai.dll` 负责在运行时 hook 文件读取；`trenka_cn.exe` 和 `trenka.exe` 大小相同（2776576），两者的区别之一是导入表：`trenka_cn.exe` 把 `COMDLG32.dll` 的导入换成了 `mai.dll`（pefile 测得），其它差异尚未比较。
 
 ## 文件指纹
 
