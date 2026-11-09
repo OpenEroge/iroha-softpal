@@ -2,6 +2,29 @@
 
 > 每次工作结束时更新：做了什么、怎么验证的、下一步做什么。最新的写在最上面。
 
+## 2026-11-10 — 支持高分屏（HiDPI）
+
+详见 [ADR-0008](adr/0008-hidpi-presentation.md)。sena-rs `edbc0d3`。
+
+### 做了什么
+- **等比缩放加黑边**：窗口比例和 16:9 不一致时（例如 3024×1964 全屏）不再拉伸。wgpu、软件渲染器和鼠标映射用同一个视口。
+- **高清文字**：ADV 正文、名字、backlog 按窗口的整数倍率（Retina 上是 2）重新光栅化，作为 sprite 的高清副本交给渲染器。只有矢量字体（`--patch mai`）会更清晰；位图字体维持原样。
+- **backlog 只在内容变化时重绘**：2x 下每帧开销从约 6.5ms 降到和 1x 相当。
+- **诊断工具**：
+  - headless 新增 `--diagnostic-device-size WxH`；
+  - wgpu 的 `--window-dump-frame-at` 改为真实 GPU 回读。
+
+### 验证
+- `cargo test -p pal-vm`：484 个全部通过，新增 8 个；pal-script、pal-asset、pal-disassembled 也全部通过。
+- 用改动前的二进制做基准，在相同输入下逐帧对比：
+  - 逻辑分辨率 PNG：`--patch mai` 7 帧、无补丁 2 帧，逐字节一致，PC 轨迹完全相同。
+  - backlog 的打开、滚动、悬停、点击 4 个状态也一致。
+- headless 2560×1440 / 3024×1964：文字明显更锐利，位置不变；黑边正确；backlog 正常（`work/diag/hidpi/`）。
+- 真实窗口：1280×900 窗口的 GPU 回读确认黑边正确，没有 wgpu 错误。
+
+### 下一步
+- 请用户用 `scripts/run.sh --patch mai` 开窗口确认：文字清晰；全屏后有上下黑边，没有拉伸；点击位置准确。（窗口诊断模式点不进游戏，wgpu 上的高清文字没能自动截图。）
+
 ## 2026-11-10 — 修复同一角色同屏出现两次（立绘表情切换）
 
 详见 [ADR-0007](adr/0007-sprite-expression-slot.md)。
