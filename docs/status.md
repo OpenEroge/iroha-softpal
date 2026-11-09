@@ -4,7 +4,7 @@
 
 ## 2026-11-09 — M3 第三轮：收藏语音、游戏内 TIPS、extcall 参数审计
 
-sena-rs `iroha` 分支 `849c2fd`..`073f950`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md) 第 6–9 节。
+sena-rs `iroha` 分支 `849c2fd`..`3b5dd04`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md) 第 6–9 节。
 
 ### 做了什么
 - **收藏语音**：18:60–68，`save/favoice.dat`，格式与原生相同。用到的辅助扩展有 18:57 `strcut`、18:106、18:107。
@@ -23,7 +23,7 @@ sena-rs `iroha` 分支 `849c2fd`..`073f950`，详见 [ADR-0004](adr/0004-m3-nati
 - trenka 专属的坐标统一登记在 `TRENKA_OWN_EXTCALLS` 表里，由 `NativeBuild::defines_extcall` 判定。
 
 ### 验证
-- `cargo test -p pal-vm`：lib 277 个通过；集成测试只有两个基线就失败的用例（`nls_config_fixture`、`operand_fixture::high_frequency…`）。`pal-script` 通过。
+- `cargo test -p pal-vm -p pal-script -p pal-asset -p pal-disassembled`：全部通过（pal-vm lib 278 个）。
 - headless 截图都用 Read 工具看过（`work/diag/m3/`）：
   - backlog 分隔线（`sep1/sep2`）
   - 点击 backlog 头像后写出 `favoice.dat`；VOICE MODE 显示 “001/500”、头像和截断后的台词（`v_mode4`）
@@ -41,7 +41,13 @@ sena-rs `iroha` 分支 `849c2fd`..`073f950`，详见 [ADR-0004](adr/0004-m3-nati
 - **选项**：本作没有原生的选项块（脚本里没有 6:1/6:2/6:3），600000 帧里也没有遇到。
 - **EXTRA 子菜单偏左**：原生的 action 提交语义和 sena 一致，大概率就是原生的样子；需要原生截图对照才能下结论。
 - **人工验收**（roadmap M3 第 3 项）：需要开窗口完整玩一条线，并人耳确认音频，必须由用户来做。
-- 3:58 结束时原生会调用 `PalSpriteSetRect` 裁剪显示区域，移植版没有做；4:5 用户音量和 4:17 的 param 语义还没有确定。
+- 收尾补完（`3e9c346`、`3b5dd04`）：
+  - 4:5 按原生方式线性淡变 BGM 声道音量；4:16/4:17 改用 AudioSystem 里对应 PalSoundGetNowChannel/GetStatus/GetParam 的实现。
+  - 3:58 结束时按原生裁剪 sprite 的显示区域。
+  - `wsprint` 支持 `%t`/`%n`/`%'`：MUSIC MODE 的曲名原来是空的，现在能显示。
+  - 修正了两个过时的上游测试：`operand_fixture` 里 btn_get_push 要先压入 group，btn_set_hit 不写目标槽；`nls_config_fixture` 在本地没有 Koikake testcase 时跳过。现在 `cargo test -p pal-vm` 全部通过，没有失败用例。
+  - 本分支自己的模块（ani、tips_dictionary、voice_favorites、trenka_wrappers、native_profile）clippy 没有警告。clippy 无法完整跑完，是因为上游的 `wmv-decoder`、`ffi.rs`、`fx.rs` 里有 deny 级别的问题，这些文件本分支没有改动。
+  - 截图检查过：MUSIC/CG/SCENE 模式（`music3`、`cgscene`），TIPS 回归（`tz`）。
 
 ## 2026-11-09 — M3 第二轮：原生子系统
 

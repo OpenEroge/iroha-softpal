@@ -2,7 +2,7 @@
 
 - 状态：Accepted；按钮与 action 的交互（EXTRA 子菜单偏移）仍为 Proposed
 - 日期：2026-11-09
-- 适用范围：`trenka.exe` sha256=`1038558f…09fd`，`dll/Pal.dll` sha256=`2ef61fc3…8463`；sena-rs `iroha` 分支 `4581a9d`..`073f950`
+- 适用范围：`trenka.exe` sha256=`1038558f…09fd`，`dll/Pal.dll` sha256=`2ef61fc3…8463`；sena-rs `iroha` 分支 `4581a9d`..`3b5dd04`
 - 引擎侧记录：`sena-rs/reverse/iroha-native-profile.md`
 
 ## 1. 版本识别与 registered 契约共用（`4581a9d`）
@@ -128,6 +128,5 @@ trenka 自己新增、或者参数约定与 registered 版本不同的 wrapper�
 
 - **EXTRA 子菜单偏左**：已经逐层核对过原生：17:29 的 append（`0x40A650`）、packed 引用解析（`0x449110`：wrapper = 0x90 + group·128 + index）、类型 15 的求值（`0x4081E0`，sin(t·π/2)）和结束回调（`0x408350`，把完整偏移累加进 wrapper +0x12C）。sena 的处理与原生一致。标题动画结束时主菜单停在 +100，子菜单停在 −100，所以“偏左”很可能就是原生的样子。按钮图像的不透明区域是 x 0–303。没有原生截图对照，暂时记为“大概率忠实”。
 - **选项**：脚本里没有 6:1/6:2/6:3（`select`/`select_set`/`select_commit`），只有 `select_init`/`select_clear`/`select_set_process`，所以本作没有原生的选项块。600000 帧共通线自动推进时也没有出现任何选项。之前推测“选项用 3:58 实现”是错的，3:58 其实是 TIPS 用的。`MAIN_SELECT` 只在 point 2344/2345 的 `select_init` 里出现，而这两个 point 没有直接调用者。
-- tweet / 截图类（18:41–48）、18:55 文本保存等仍是 Skip。
-- 3:58 结束时原生会调用 `PalSpriteSetRect`，把 sprite 的显示区域裁到文字范围。移植版没有做这一步（画布本身是透明的，目前看不出差异）。
+- tweet、截图等宿主功能（18:43–48、18:76）按原生个数弹栈，但返回中性结果，移植版没有对应功能。
 - 存档界面 “NEW!” 被存档位底板（按钮层）部分遮挡：sena 的优先级公式和原生一致，暂不改动。
