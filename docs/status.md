@@ -2,6 +2,30 @@
 
 > 每次工作结束时更新：做了什么、怎么验证的、下一步做什么。最新的写在最上面。
 
+## 2026-11-09 — M3 第二轮：原生子系统
+
+sena-rs `iroha` 分支 `4581a9d`..`6734cf4`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md)。
+
+### 做了什么
+- **识别 trenka 版本**：用完整文件哈希识别 `NativeBuild::Trenka`。逐个比对后，把 SE、backlog 图标、历史导航、host 查询等与 registered 版本一致的 extcall 坐标，通过一张逐坐标的数据表开放给本作，不打开整个 registered profile。
+- **完整的 `.ani` 解释器**（`ani.rs`），本作 351 个程序全部能运行；新增 3:33 `sp_anime_clear`；`sp_set_pos_ex` 按版本区分（trenka 写位置层，审计过的 Game.exe 写旋转层）。
+- **action 段类型 16（rect 补间）和 20（mask 显现）**：剧情里的斩击特效原来是黑屏，现在能正常显示。
+- **存档界面**：去掉了空存档位上的幽灵缩略图；日期和时间不再重叠；台词按原生规则换行。
+- **TIPS 词典**（18:82–87）、存档目录和字符串辅助函数、全局整数表、18:108。
+- **INI 读取**：`TIPS_FLAG = 1;` 这种值现在能正确读出；文件名改为按 File.dat 解析。
+
+### 验证
+- `cargo test -p pal-vm`：lib 265 个通过；集成测试只有两个基线就失败的用例（`nls_config_fixture` 缺少 testcase；`operand_fixture::high_frequency…` 是上游对按钮栈行为的预期，与本次改动无关）。`pal-script` 通过。
+- headless 截图检查过（`work/diag/m3/`）：系统菜单、SAVE→LOAD 往返（恢复到原来那句台词）、backlog（有头像）、TIPS 画面、EXTRA 子菜单、斩击特效、存档 “NEW!” 动画。
+- 模拟首次启动（清空 `work/isolated-game/save/sena_rs`）：读到 `TIPS_FLAG=1`，加载 272 条词条，写出 `save/tips_acc.dat`。
+- 180000 帧自动推进（游戏内约 48 分钟）没有卡住。
+
+### 下一步
+1. 收藏语音（18:60–68、14:25）。
+2. EXTRA 子菜单偏左约 200px（原本就存在的问题，需要逆向按钮与 action 的交互）。
+3. 找到第一个选项并验证；3:58 `drawtext`。
+4. 关窗保存系统数据；窗口模式下人工确认音频。
+
 ## 2026-11-09 — M3 开局：进入游戏，文本/立绘/背景/音频
 
 sena-rs `iroha` 分支：`dd36acb`（sp_get_filename 去后缀）、`400a53a`（SE 5:2 按原生顺序解析参数）、`5a6d48f`（`--diagnostic-realtime`）、`1f7fc2a`（native profile 文档）。详见 [ADR-0003](adr/0003-m3-game-start-and-av.md)。
