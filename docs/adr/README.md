@@ -15,3 +15,4 @@
 | 0004 | [M3 原生子系统：版本识别、ANI、action 扩展、存档标签、TIPS](0004-m3-native-subsystems.md) | Accepted / Proposed（收藏语音等） |
 | 0005 | [M4 战斗演出的归属；M5 mai 汉化覆盖层](0005-m4-battle-m5-mai-overlay.md) | Accepted |
 | 0006 | [ADV 右侧菜单由脚本线程驱动](0006-adv-menu-script-thread.md) | Accepted |
+| 0007 | [立绘表情切换的槽位查找（trenka 的 18:3）](0007-sprite-expression-slot.md) | Accepted |

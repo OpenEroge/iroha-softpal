@@ -95,6 +95,7 @@ sena-rs `iroha` 分支：
   - 2,300,000 帧整线自动推进，在战斗脚本区间（`0xB9000–0xDE000`）停留了 14,137 帧，没有 unimplemented，没有 panic（`work/diag/m4/route_*.txt`）
   - 第 467200–469000 帧逐 40 帧截图，可以看到 “Aoi's view” 视角切换、集中线 cut-in、刀光 sprite、角色滑入，以及带头像的文本框（`work/diag/m4/seq_a.png`）
   - 第 1068680 帧附近同屏出现两个造型相同的角色：脚本在这里分别设置了 `ST07E_B010` 和 `ST21A_A010` 两个不同的立绘，是有意的演出，不是残留的 sprite
+    - 更正（2026-11-10，见 ADR-0007）：18:3 的语义错误会把表情切换送进错误的槽位，造成同一角色出现两次。上面的结论是在修复之前得出的，需要在修复后复查。
 - 回归：`cargo test -p pal-vm -p pal-script -p pal-asset -p pal-disassembled` 全部通过；`cargo check --workspace --all-targets` 没有错误。不加 `--patch` 时代码路径与原来相同。
 
 ## 未解决
