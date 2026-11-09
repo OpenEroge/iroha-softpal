@@ -34,13 +34,14 @@
 - 主 opcode 表 `0x64C890`（265 项），extcall category 表 `0x626098`；alias 区域和 Reference 不同（详见 `sena-rs/reverse/evidence/iroha-trenka-interface-inventory.json`）。
 - SCRIPT.SRC：419 种不同的 extcall，41,713 处调用，全部有原生 handler；sena 中有 86 种会被跳过（Skip）。
 
-## 汉化覆盖层（M5 才处理）
+## 汉化覆盖层（M5，ADR-0005）
 
-- `mai/sc/text.mai`（约 0.95MB）：开头是 `$TEXT_LIST__`，和 PAL 的 TEXT.DAT 同一魔数，推测是替换后的 TEXT.DAT（可能还套了一层加密或压缩）。
-- `mai/img/*.PGD.mai`：660 个 PGD 替换图，另有 1 个 `TIPSS1056PGD.mai`（文件名少了点号）。
-- `mai/chg/`：`LOGO.mpg.mai`、`OPENING.mpg.mai`、`TIPS.CSV.mai`。
-- `mai/word.mai`（64KB），用途未知（字体映射或码表？）。
-- `mai.dll` 负责在运行时 hook 文件读取；`trenka_cn.exe` 和 `trenka.exe` 大小相同（2776576），两者的区别之一是导入表：`trenka_cn.exe` 把 `COMDLG32.dll` 的导入换成了 `mai.dll`（pefile 测得），其它差异尚未比较。
+- `trenka_cn.exe` 与 `trenka.exe` 只差导入表里的一处：`COMDLG32.dll!GetSaveFileNameA` 换成了 `mai.dll!MetSaveFileNameA`（逐字节比较只有 13 字节不同）。所有功能都由 `mai.dll` 在 DllMain 里挂钩实现。
+- `mai.dll` 挂钩 `PalFileCreateEx`（`mai\chg\<名>.mai` 整文件替换）、`PalSpriteLoad`（`mai\img\<名>.mai` 的 PNG 覆盖像素）、`PalFontSetType`（4→1）、exe 内的文本记录读取函数 `0x44B470`（按记录 id 换成 `text.mai` 的记录，id 0–4 除外），以及 `CreateFontA`（强制 SimHei + GB2312_CHARSET）和 `GetGlyphOutlineA`。
+- `mai/sc/text.mai`：`$TEXT_LIST__`，加密方式与 TEXT.DAT 相同，25,793 条记录（与原版条数一致）。
+- `mai/img/`：661 个 PNG。655 个与原图尺寸一致；2 个 TIPS 缩略图尺寸不符；4 个找不到原图，其中 `TIPSS1056PGD.mai` 的文件名少了点号。
+- `mai/chg/`：`LOGO.mpg.mai`、`OPENING.mpg.mai`（MPEG-PS）和 `TIPS.CSV.mai`（272 条）。
+- `mai/word.mai`：65536 字节，每个 UTF-16 码位一个标志，共 2,996 个非 ASCII 字符被标记。译文**不是 GBK**，而是“伪 Shift-JIS”：cp932 能表示的字符保留原码；cp932 没有的简体字按顺序占用译文没用到的汉字区码位（详见 ADR-0005）。
 
 ## 文件指纹
 

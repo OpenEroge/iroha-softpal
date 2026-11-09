@@ -34,13 +34,13 @@
   - 2026-11-10 人工验收，用户原话：“音乐是正常的”，“音效正常，可以玩，和原本的差不多”。
 
 ## M4 战斗 / 特殊系统
-- [ ] 确认 `battle.pac` 对应的逻辑在哪里：脚本侧还是 exe 内置。如果是 exe 内置，就逆向 `trenka.exe` 里的专用 extcall 或子系统。
-- [ ] 以引擎通用 extcall 的形式实现，不在 VM 里硬编码本作逻辑。
+- [x] 确认 `battle.pac` 对应的逻辑在哪里：脚本侧还是 exe 内置。如果是 exe 内置，就逆向 `trenka.exe` 里的专用 extcall 或子系统。（结论：在脚本侧，是非交互的演出，见 ADR-0005）
+- [x] 以引擎通用 extcall 的形式实现，不在 VM 里硬编码本作逻辑。（只用到 M3 已审计的通用 extcall；整线自动推进经过战斗段，没有未实现的调用）
 
 ## M5 汉化（mai 覆盖层）
-- [ ] 逆向 `mai.dll`：hook 了哪些点、`.mai` 的封装（加密/压缩）方式、`word.mai` 的作用。
-- [ ] 在 sena-rs 里以“VFS 覆盖层”的形式实现（例如 `--overlay <dir>` / `--patch mai`），按文件名映射替换 TEXT.DAT、PGD、CSV、MPG。
-- [ ] 处理 GBK 文本和中文字体；`trenka_cn.exe` 与原版的差异（字符集、字体名）。
+- [x] 逆向 `mai.dll`：hook 了哪些点、`.mai` 的封装（加密/压缩）方式、`word.mai` 的作用。
+- [x] 在 sena-rs 里以“VFS 覆盖层”的形式实现（例如 `--overlay <dir>` / `--patch mai`），按文件名映射替换 TEXT.DAT、PGD、CSV、MPG。（`--patch mai`）
+- [x] 处理 GBK 文本和中文字体；`trenka_cn.exe` 与原版的差异（字符集、字体名）。（实际不是 GBK，而是由 `word.mai` 生成的伪 Shift-JIS 码表；字体用 SimHei 的宿主替代字体）
 
 ## M6 打包与发布
 - [ ] macOS：复用 `sena-rs/platform/macos` 打 .app/DMG；Linux：x86_64/aarch64 构建。

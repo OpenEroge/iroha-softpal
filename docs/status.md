@@ -2,6 +2,43 @@
 
 > 每次工作结束时更新：做了什么、怎么验证的、下一步做什么。最新的写在最上面。
 
+## 2026-11-10 — M4 战斗、M5 mai 汉化覆盖层
+
+sena-rs `iroha` 分支 `d0b4dd2`，详见 [ADR-0005](adr/0005-m4-battle-m5-mai-overlay.md)。
+
+### 做了什么
+- **M4 战斗**：确认 `battle.pac` 的资源名只出现在 `FILE.DAT`，exe 里没有。用到它们的是脚本 `0xB9000–0xDE000` 区间的演出函数和各章 SE 调用，只调用通用 extcall，也不等待输入。结论：战斗是非交互的脚本演出，不需要专用 extcall，M3 的 extcall 审计已经覆盖。
+- **M5 mai.dll 逆向**：
+  - `trenka_cn.exe` 只改了一个导入。
+  - `mai.dll` 挂钩了 `PalFileCreateEx`（chg）、`PalSpriteLoad`（img 的 PNG）、`PalFontSetType`（4→1）、exe 的文本记录读取（`text.mai` 按 id 替换，id 0–4 除外），以及 `CreateFontA` / `GetGlyphOutlineA`（SimHei + 码表）。
+  - `word.mai` 是译文用到的字符集合，DLL 由它生成“伪 Shift-JIS”码表，所以译文并不是 GBK。
+- **M5 实现**：`--patch mai`。
+  - `pal_asset::MaiCharset` / `Nls::Mai`：码表不拷贝 DLL 数据，在运行时重新生成；补丁没分配的码位回退 cp932。
+  - `MaiPatch` + `ResourceManager::set_mai_patch`：chg 文件覆盖所有搜索路径。
+  - `CoreAssets::apply_text_patch`：按原记录偏移映射到补丁里同 id 的记录。
+  - `decode_asset_image`：尺寸相同才替换像素。
+  - 字体：类型 4→1；SimHei 由宿主字体代替（macOS 上是 STHeiti）。
+- 新增测试 12 个（pal-asset 6 个，pal-vm 6 个）；`TIPS.CSV` 和 `movie` 加载时会在 debug 日志里记下来源。
+
+### 验证
+- `cargo test -p pal-vm -p pal-script -p pal-asset -p pal-disassembled`：全部通过（pal-vm lib 284 个）。`cargo check --workspace --all-targets` 没有错误。
+- 码表与 DLL 算法的模拟结果对比，2,996 个字符全部一致。补丁加载：3 个 chg 文件、661 张图、25,793 条文本，替换了 Text.dat 的 25,788 条。
+- headless 截图（`work/diag/m5/`）。命令示例：`scripts/headless.sh 12100 --patch mai --diagnostic-auto-advance ...`，空存档用 `work/re/m5/fresh.sh` 跑。
+  - 汉化组 staff 的 CAUTION 画面和 chg 里的 LOGO 动画
+  - 中文正文和名字框
+  - SYSTEM、SAVE 画面和确认框
+  - 收藏语音画面
+  - 游戏内 TIPS 小窗口（`TIPS.CSV.mai` 读到 272 条）
+  - 存档后，存档格里的中文摘要正确
+- M4：2,300,000 帧整线自动推进，在战斗区间停留 14,137 帧，没有 unimplemented，没有 panic；第 467200 帧附近的战斗截图序列见 `work/diag/m4/seq_a.png`。
+
+### 结论 / 未完成
+- 当前 `work/isolated-game/save` 是之前整线跑出来的状态：自动点击把 TIPS 开关（`mem_system[110]`）关掉了，所以 EXTRA 里看不到 TIPS 标签页，游戏内也没有 TIPS。这是存档数据造成的，不是引擎问题；用空存档时一切正常。
+- 没有原生 Windows 截图可以对照，所以 SimHei 与 STHeiti 的字形差异、战斗演出的细节只做了合理性检查。
+- 汉化补丁的说明文件写着“严禁拆解、二次修改、移植应用于任何平台”。本仓库不分发、也不修改补丁文件，只在运行时读取用户本地的副本。
+- 窗口模式运行汉化版：`scripts/run.sh --patch mai`（需要用户人工验收）。
+- 下一步：M6 打包与发布。
+
 ## 2026-11-09 — M3 第三轮：收藏语音、游戏内 TIPS、extcall 参数审计
 
 sena-rs `iroha` 分支 `849c2fd`..`5c16593`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md) 第 6–9 节。
