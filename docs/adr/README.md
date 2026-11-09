@@ -14,3 +14,4 @@
 | 0003 | [M3 开局：GAME START、sprite 名查询、SE 参数、headless 音频节奏](0003-m3-game-start-and-av.md) | Accepted |
 | 0004 | [M3 原生子系统：版本识别、ANI、action 扩展、存档标签、TIPS](0004-m3-native-subsystems.md) | Accepted / Proposed（收藏语音等） |
 | 0005 | [M4 战斗演出的归属；M5 mai 汉化覆盖层](0005-m4-battle-m5-mai-overlay.md) | Accepted |
+| 0006 | [ADV 右侧菜单由脚本线程驱动](0006-adv-menu-script-thread.md) | Accepted |

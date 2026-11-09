@@ -2,6 +2,42 @@
 
 > 每次工作结束时更新：做了什么、怎么验证的、下一步做什么。最新的写在最上面。
 
+## 2026-11-10 — 修复 ADV 右侧菜单（MENU 面板按钮不显示）
+
+详见 [ADR-0006](adr/0006-adv-menu-script-thread.md)。不加 `--patch` 时也有这个问题。
+
+### 问题
+用户截图：点 `>>` 后，MENU 面板只有底板和一个“快速存档”提示框，按钮全部看不见。
+
+### 原因
+菜单由脚本线程 point 2367 驱动：悬停时滑入，移开时滑出。sena 在四个地方与原生不一致：
+1. 线程函数 `ret` 一次就被停掉，主脚本等待时也不运行线程。原生是每帧都重新调用。
+2. 为 Koikake 写的宿主端菜单模拟拦截了点击，自己切换显示状态，结果只显示了底板，按钮的 alpha 还是 0。
+3. 本作套用了 Koikake 的 action 表大小（8×32）。原生是 16 个 bank、每个 64 条 line，菜单用到的 lane 最大是 47。
+4. trenka 的 `sp_set_pos_move` 应该能移动打包的按钮槽位，sena 没有处理。
+
+### 改动
+sena-rs：
+- 线程函数返回后下一帧重新进入，主脚本等待时也调度，指令预算与主脚本相同。
+- 删除宿主端菜单模拟。`btn_enable` 不再隐藏按钮。
+- `NativeBuild::wide_action_tables`、`sprite_slots_resolve_buttons`。
+- 15:8 返回栈深度。
+- 新增 2 个测试，替换 1 个旧测试。
+
+### 验证
+- `cargo test -p pal-vm -p pal-script -p pal-asset -p pal-disassembled`：全部通过（pal-vm lib 285 个）。`cargo check --workspace --all-targets` 只有原来就有的 warning。
+- headless（`work/diag/m5menu/`），鼠标位置靠注入的点击移动：
+  - 区域外只显示 `>>`。
+  - 移到面板上，按钮全部滑入到正确位置，`>>` 隐藏。
+  - 移开后滑出。
+  - 加 `--patch mai` 时，点 Q.SAVE 写入 `save999.dat`，点 SYSTEM 打开中文 SYSTEM 画面。
+- 标题画面：新旧二进制在相同输入下逐帧截图一致。
+- 剧情回归：200,000 帧自动推进（`--diagnostic-auto-advance-min-frames 30`），剧情持续推进（`r50k/r120k/r199k.png`），没有 unimplemented，没有 panic。只有 sprite transition 相关的诊断 WARN（`scale-inherit`，以及 7 条 slot 12 “no current image”），与菜单无关；这次没有和旧二进制对比过。
+
+### 下一步
+- 请用户开窗口验收：`scripts/run.sh --patch mai`，把鼠标移到右侧呼出菜单，试一下各个按钮。
+- 删除的菜单模拟原本是为 Koikake 写的。原理上 Koikake 也应该由脚本线程驱动菜单，但本机没有 Koikake 资源，无法做运行时验证。
+
 ## 2026-11-10 — M4 战斗、M5 mai 汉化覆盖层
 
 sena-rs `iroha` 分支 `d0b4dd2`，详见 [ADR-0005](adr/0005-m4-battle-m5-mai-overlay.md)。
