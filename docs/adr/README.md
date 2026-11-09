@@ -11,3 +11,4 @@
 |---|---|---|
 | 0001 | [资源层与 Koikake 的差异](0001-resource-layer.md) | Accepted |
 | 0002 | [trenka/Pal.dll 原生接口、extcall 覆盖与 gosub 操作数](0002-native-interface-and-extcalls.md) | Accepted / Proposed（未实现的 extcall） |
+| 0003 | [M3 开局：GAME START、sprite 名查询、SE 参数、headless 音频节奏](0003-m3-game-start-and-av.md) | Accepted |

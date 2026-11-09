@@ -2,6 +2,29 @@
 
 > 每次工作结束时更新：做了什么、怎么验证的、下一步做什么。最新的写在最上面。
 
+## 2026-11-09 — M3 开局：进入游戏，文本/立绘/背景/音频
+
+sena-rs `iroha` 分支：`dd36acb`（sp_get_filename 去后缀）、`400a53a`（SE 5:2 按原生顺序解析参数）、`5a6d48f`（`--diagnostic-realtime`）、`1f7fc2a`（native profile 文档）。详见 [ADR-0003](adr/0003-m3-game-start-and-av.md)。
+
+### 做了什么 / 观察到什么
+- **M2 留下的“GAME START 卡住”其实不是卡住**：pc `0x82490` 是附加内容通知的 toast 子程序，`mem_system[262]==0` 时连着显示 4 条，合计约 1100 帧。等通知播完再点 GAME START，就能进入序章。
+- **修复 1**：开场演出用 `sp_get_filename` 取立绘名，再拿这个名字 `sp_set`。sena 返回的名字带 `.pgd`，加载器又追加一次后缀，结果立绘丢失。按原生证据（名字保存在记录 +0x254，不带后缀），现在返回原名。
+- **修复 2**：SE 5:2 的第 5 个参数是声音组选择值（查表 {5,4,6}），不是音量。sena 原来把它当成 1% 音量，SE 几乎听不见。现在 flags/淡入/声音组都按原生语义处理。5:1 的参数个数因版本而异（本作压 3 个，Koikake 压 4 个），这次没动。
+- **测试方法问题**：原来的 headless 帧之间不睡眠，开着音频时 VM 时钟远远跑在实际播放前面，按钮反应要等点击音效播完，因此点不进去。新增 `--diagnostic-realtime`，外层用 `HEADLESS_AUDIO=1 scripts/headless.sh …` 开启。
+
+### 验证
+- `scripts/headless.sh 8000 --diagnostic-auto-advance --diagnostic-auto-advance-min-frames 90 --diagnostic-click-when-hit-enabled 280:184 --diagnostic-png-at …`：第 3600 帧出现第一句台词，背景、立绘、名字框、VOICE 图标正常；后续有事件 CG 和 face 小头像。截图用 Read 工具看过（`work/diag/m3/sheet.png`）。
+- 实时音频运行（3400 帧，第 2500 帧点击）：play 了 BGM08、系统语音、台词语音 VO02/VO09、SE；SE 的有效音量从 56 恢复到 5600。**还没有人耳确认**。
+- 30000 帧 auto-advance：剧情一直在推进；OPENING 视频播放 124 秒，画面和 ffmpeg 解码结果一致（35 秒处的“花屏”是 OP 本身的特效）。
+- `cargo test -p pal-vm`：lib 250 个通过；集成测试只有两个基线就失败的用例。`cargo test -p pal-script` 通过。
+
+### 下一步
+1. 开窗口（`scripts/run.sh`）人耳确认 BGM/SE/语音，顺带检查 BGM 循环点。
+2. `.ANI` 字节码：`ANI_LINE_EFFECT*`、`ANI_SYM_ASERI` 等多指令动画还不支持（开场 letterbox 线条没有过渡效果）。
+3. 5:1 参数个数按版本区分（本作 22 处调用，执行到时会造成栈错位）。
+4. 关闭窗口时保存系统数据（否则附加内容通知每次启动都会重新显示）；先确认原生退出时是否会写 system.dat。
+5. M3 第二项：选项、存读档、系统菜单、backlog、TIPS（18:86/87 还是 Skip）、SD 演出。
+
 ## 2026-11-09 — M1 资源层 + M2 启动到标题
 
 sena-rs `iroha` 分支：`0640fb1`（修好 pal-vm 测试的编译）、`438b4e4`（gosub 操作数解码 + trenka 接口 evidence）。
