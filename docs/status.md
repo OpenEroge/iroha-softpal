@@ -2,6 +2,45 @@
 
 > 每次工作结束时更新：做了什么、怎么验证的、下一步做什么。最新的写在最上面。
 
+## 2026-11-09 — M3 第三轮：收藏语音、游戏内 TIPS、extcall 参数审计
+
+sena-rs `iroha` 分支 `849c2fd`..`073f950`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md) 第 6–9 节。
+
+### 做了什么
+- **收藏语音**：18:60–68，`save/favoice.dat`，格式与原生相同。用到的辅助扩展有 18:57 `strcut`、18:106、18:107。
+- **backlog 分隔线**：14:25 原来以为是收藏图标，逆向后确认是每条记录之间的分隔线（`HISTORY_LINE_*`）。
+- **sprite 画布**：trenka 的 3:32 `sp_create` 有 6 个参数，带名字、位置和尺寸。3:22 `sptext` 在 slot 已有 sprite 时，把文字画进现有表面（Totsulover 也是这样，因此对所有版本生效）。
+- **游戏内 TIPS**：ADV 渲染器原来先把 `<dN>` 标签剥掉了，所以 TIPS 词条从来没有被识别。修复后补上了 3:58 `drawtext`、8:27 `btn_blt`、8:31/32。词条会以绿色高亮，点击后在 (8,334) 弹出 TIPS 小窗口。
+- **3:14 改正**：trenka 写的是基础位置（绝对移动），不是另一个叠加的图层。原来按叠加处理，TIPS 小窗口的坐标被算了两遍。
+- **三行台词**：文本块的高度改为按每行实际步进计算，最后一行不再被裁掉。
+- **参数个数审计**：脚本用到的 419 个 extcall 坐标，弹栈个数现在全部与原生一致。顺带修好了这些：
+  - 3:13 每次调用往栈上多留 2 个值
+  - 9:55 `get_font_color`（所有版本）
+  - 2:18/19 `text_n`/`text_cat`：原来这两处台词根本不显示
+  - 2:20 `set_history`、3:38 `sp_bitblt`
+  - 10:29 存档“データ移動”
+  - 其余的小 wrapper
+- trenka 专属的坐标统一登记在 `TRENKA_OWN_EXTCALLS` 表里，由 `NativeBuild::defines_extcall` 判定。
+
+### 验证
+- `cargo test -p pal-vm`：lib 277 个通过；集成测试只有两个基线就失败的用例（`nls_config_fixture`、`operand_fixture::high_frequency…`）。`pal-script` 通过。
+- headless 截图都用 Read 工具看过（`work/diag/m3/`）：
+  - backlog 分隔线（`sep1/sep2`）
+  - 点击 backlog 头像后写出 `favoice.dat`；VOICE MODE 显示 “001/500”、头像和截断后的台词（`v_mode4`）
+  - EXTRA → TIPS 的列表和详细说明（`t_a2`、`t_detail`）
+  - 游戏内 TIPS：auto-advance 下约第 28440 帧出现词条，点击后小窗口位置正确（`tx3`）
+  - 三行台词不再被裁（`ty3c`）
+  - 存档“データ移動”（`mv2/mv3`）
+  - SAVE/SYSTEM 回归（`r_save`、`r_system`、`r2_pair`）
+- 600000 帧自动推进：剧情持续推进，没有 unimplemented，没有出现任何选项（`long2/sheet.png`）。
+- 栈深度：30000 帧里，每次 `text` 调用时的栈深度一直稳定，不再增长。
+
+### 结论 / 未完成
+- **选项**：本作没有原生的选项块（脚本里没有 6:1/6:2/6:3），600000 帧里也没有遇到。
+- **EXTRA 子菜单偏左**：原生的 action 提交语义和 sena 一致，大概率就是原生的样子；需要原生截图对照才能下结论。
+- **人工验收**（roadmap M3 第 3 项）：需要开窗口完整玩一条线，并人耳确认音频，必须由用户来做。
+- 3:58 结束时原生会调用 `PalSpriteSetRect` 裁剪显示区域，移植版没有做；4:5 用户音量和 4:17 的 param 语义还没有确定。
+
 ## 2026-11-09 — M3 第二轮：原生子系统
 
 sena-rs `iroha` 分支 `4581a9d`..`6734cf4`，详见 [ADR-0004](adr/0004-m3-native-subsystems.md)。
